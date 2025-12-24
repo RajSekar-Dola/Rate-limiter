@@ -20,10 +20,12 @@ local refill = delta * tonumber(ARGV[2])
 tokens = math.min(tonumber(ARGV[1]), tokens + refill)
 
 if tokens < 1 then
+    redis.call("HMSET", KEYS[1], "tokens", tokens, "timestamp", now)
+    redis.call("EXPIRE", KEYS[1], 3600)
     return 0
 else
     tokens = tokens - 1
     redis.call("HMSET", KEYS[1], "tokens", tokens, "timestamp", now)
     redis.call("EXPIRE", KEYS[1], 3600)
-    return 1
+    return math.floor(tokens)
 end
